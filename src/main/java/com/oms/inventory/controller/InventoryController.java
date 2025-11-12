@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
@@ -44,15 +46,15 @@ public class InventoryController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<?> getAll() {
+    public ResponseEntity<?> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         try {
-            return ResponseEntity.ok(
-                    ApiResponse.ok(inventoryService.getAllProducts())
-            );
+            Map<String, Object> result = inventoryService.getAllProducts(page, size);
+            return ResponseEntity.ok(ApiResponse.ok(result));
         } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    ApiErrorResponse.of("FETCH_FAILED", ex.getMessage())
-            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiErrorResponse.of("FETCH_FAILED", ex.getMessage()));
         }
     }
 

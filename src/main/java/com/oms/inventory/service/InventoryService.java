@@ -2,10 +2,15 @@ package com.oms.inventory.service;
 
 import com.oms.inventory.entity.Product;
 import com.oms.inventory.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -28,8 +33,16 @@ public class InventoryService {
         return productRepository.save(p);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public Map<String, Object> getAllProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "name"));
+        Page<Product> productPage = productRepository.findAll(pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("items", productPage.getContent());
+        response.put("currentPage", productPage.getNumber());
+        response.put("totalItems", productPage.getTotalElements());
+        response.put("totalPages", productPage.getTotalPages());
+        return response;
     }
 
     public Optional<Product> getByProductCode(String productCode) {
